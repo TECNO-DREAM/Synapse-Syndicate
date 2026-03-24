@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapse Syndicate | Master Secure v15.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen" id="app-body" oncontextmenu="return false;">
+
+    <div id="auth-view" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border border-white/20 text-center">
+            <div id="login-form">
+                <h1 class="text-4xl font-black tracking-tighter text-slate-800 uppercase mb-2">Synapse</h1>
+                <p class="text-[10px] font-black tracking-[0.3em] text-blue-600 mb-8 uppercase">Master Secure v15.0</p>
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <input type="email" id="login-email" placeholder="Email Address" class="w-full p-4 rounded-2xl bg-slate-50 border focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                    <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-slate-50 border focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition tracking-wider text-sm uppercase">Initialize Login</button>
+                </form>
+                <p class="text-center mt-6 text-xs text-slate-400 font-medium">New member? <button onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline">Request Access</button></p>
+            </div>
+            
+            <div id="register-form" class="hidden">
+                <h1 class="text-2xl font-black text-slate-800 uppercase mb-4">Join the Syndicate</h1>
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 rounded-2xl bg-slate-50 border outline-none font-medium" required>
+                    <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-2xl bg-slate-50 border outline-none font-medium" required>
+                    <input type="password" id="reg-pass" placeholder="Create Password" class="w-full p-4 rounded-2xl bg-slate-50 border outline-none font-medium" required>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-slate-800 active:scale-95 transition">SEND REQUEST</button>
+                </form>
+                <button onclick="toggleAuthMode()" class="w-full mt-6 text-[10px] font-black text-slate-400 uppercase">← Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden flex-col min-h-screen">
+        <nav class="glass sticky top-0 z-50 bg-white/80 border-b px-6 md:px-10 py-4 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-6">
+                <h2 class="font-black text-2xl text-blue-600 tracking-tighter cursor-pointer" onclick="resetToRoot()">SYNAPSE</h2>
+                <div id="breadcrumbs" class="hidden md:flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest gap-2"></div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="admin-panel-btn" onclick="toggleAdminPanel()" class="hidden bg-amber-500 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-amber-500/20">Admin Control</button>
+                <button onclick="document.getElementById('app-body').classList.toggle('dark')" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition">🌓</button>
+                <span id="user-display" class="text-[10px] font-black text-white px-3 py-1.5 rounded-lg uppercase shadow-sm"></span>
+                <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase hover:underline">Logout</button>
+            </div>
+        </nav>
+
+        <div id="admin-panel" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] p-4 md:p-10 overflow-y-auto">
+            <div class="max-w-6xl mx-auto bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 border">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900">Admin <span class="text-amber-500">Center</span></h2>
+                    <button onclick="toggleAdminPanel()" class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black uppercase text-xs">Close Panel</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+                    <div class="bg-slate-50 p-8 rounded-[2.5rem] border">
+                        <h3 class="font-black uppercase text-xs mb-6 text-blue-600">Pending Approvals</h3>
+                        <div id="pending-list" class="space-y-4"></div>
+                    </div>
+                    <div class="bg-slate-50 p-8 rounded-[2.5rem] border">
+                        <h3 class="font-black uppercase text-xs mb-6 text-emerald-600">Approved Students</h3>
+                        <div id="student-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <header class="p-8 md:p-12 max-w-7xl mx-auto w-full flex justify-between items-end">
+            <div>
+                <h3 id="current-title" class="text-5xl md:text-6xl font-black tracking-tighter mb-2 text-slate-900">Vault</h3>
+                <p id="current-desc" class="text-slate-400 font-bold uppercase text-xs tracking-[0.3em]">Directory Overview</p>
+            </div>
+            <button id="back-btn" onclick="goBack()" class="hidden bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-600 transition shadow-lg text-sm tracking-widest uppercase">← Back</button>
+        </header>
+
+        <div id="main-grid" class="p-8 md:p-12 max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pb-56"></div>
+
+        <div id="admin-bar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-6 z-40">
+            <div class="bg-slate-900/95 glass rounded-[2.5rem] p-6 shadow-2xl border border-white/10 flex flex-col gap-4">
+                <div class="flex gap-3 items-center">
+                    <div id="creator-fields" class="flex-grow flex gap-3"></div>
+                    <button onclick="handleCreation()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-blue-500 transition shadow-lg uppercase text-xs tracking-widest">Add Asset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewer" class="hidden fixed inset-0 bg-slate-900/98 glass z-[100] flex-col p-4 md:p-8">
+        <div class="flex justify-between items-center text-white mb-6">
+            <h3 id="v-title" class="font-black uppercase text-sm tracking-widest text-slate-300">Vault Viewer (Protected)</h3>
+            <button onclick="closeViewer()" class="bg-red-500 px-10 py-3 rounded-2xl font-black text-xs uppercase hover:bg-red-400 transition">Close Viewer</button>
+        </div>
+        <div id="v-frame"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
